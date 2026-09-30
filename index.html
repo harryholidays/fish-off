@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>fish off.</title>
+<meta name="theme-color" content="#7ecafe">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="fish off.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#7ecafe;--ink:#111;--soft:rgba(17,17,17,.55);--line:rgba(17,17,17,.9)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg)}
+body{font-family:Gaegu,"Comic Sans MS",cursive;color:var(--ink);font-size:22px;line-height:1.35;min-height:100vh;text-transform:lowercase}
+button,input{font:inherit;color:inherit;text-transform:inherit;background:none;border:0;padding:0;margin:0}
+button{cursor:pointer}
+.wrap{max-width:480px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 28px 170px}
+svg.ink{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+header{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:24px}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--ink)}
+.dot.spin{animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.6)}}
+
+.doodle{display:flex;justify-content:center;margin:40px 0 26px}
+.doodle svg{width:180px;height:120px}
+
+.score{font-size:26px;line-height:1.3}
+.score .big{font-size:30px}
+.prose{margin-top:14px;font-size:21px}
+.prose p{margin:0 0 4px}
+.sig{margin-top:14px;font-size:22px}
+
+.logh{display:flex;justify-content:space-between;align-items:baseline;margin:44px 0 6px}
+.logh .clear{font-size:18px;text-decoration:underline;text-underline-offset:3px}
+.entry{display:flex;gap:14px;align-items:center;width:100%;text-align:left;padding:12px 0;border-top:1.5px dashed rgba(17,17,17,.35)}
+.entry:first-of-type{border-top:0}
+.pic{width:52px;height:52px;flex:none;border:2px solid var(--ink);border-radius:12px 16px 11px 15px;overflow:hidden;display:grid;place-items:center}
+.pic img{width:100%;height:100%;object-fit:cover}
+.pic svg{width:34px;height:24px}
+.e-main{flex:1;min-width:0}
+.e-top{font-size:24px;font-weight:700;line-height:1.1}
+.e-sub{font-size:18px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.e-who{font-size:18px;flex:none}
+.empty{color:var(--soft);font-size:20px;padding:10px 0}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);padding:8px 20px calc(10px + env(safe-area-inset-bottom))}
+.bar-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:end}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px;line-height:1;padding-bottom:10px}
+.tab svg{width:30px;height:26px}
+.tab b{font-size:22px}
+.tab[aria-pressed=true] .nm{text-decoration:underline wavy;text-underline-offset:4px}
+.oval{width:66px;height:112px;display:grid;place-items:center;position:relative}
+.oval svg.o{position:absolute;inset:0;width:100%;height:100%}
+.oval svg.plus{width:34px;height:40px}
+.oval:active{transform:scale(.95)}
+.hint{position:fixed;z-index:19;pointer-events:none;font-size:19px;line-height:1.05;text-align:left;transition:opacity .3s}
+.hint svg{width:60px;height:50px;display:block}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(17,17,17,.25);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--bg);border-top:2px solid var(--ink);border-radius:28px 30px 0 0;max-height:92vh;overflow:auto;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1)}
+.sheet.on{transform:none}
+.sheet-in{max-width:480px;margin:0 auto;padding:18px 28px calc(28px + env(safe-area-inset-bottom))}
+.sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.x{font-size:20px;text-decoration:underline;text-underline-offset:3px}
+.q{font-size:20px;color:var(--soft);margin:18px 0 4px}
+.words{display:flex;flex-wrap:wrap;gap:4px 14px}
+.w{position:relative;font-size:25px;padding:2px 6px}
+.w[aria-pressed=true]::before{content:"";position:absolute;inset:-4px -8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M8 22C6 9 40 3 66 5s33 10 30 19-30 13-55 12S5 30 9 18c3-8 20-12 36-13' fill='none' stroke='%23111' stroke-width='2.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat;pointer-events:none}
+.line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.u{border-bottom:2px solid var(--ink);font-size:25px;padding:0 2px;outline:none;border-radius:0}
+.u::placeholder{color:rgba(17,17,17,.4)}
+.u.n{width:70px;text-align:center}
+.u.full{width:100%}
+input[type=number]::-webkit-inner-spin-button{appearance:none}
+.photo{display:flex;align-items:center;gap:12px;font-size:22px}
+.photo input{display:none}
+.photo .pv{width:52px;height:52px;border:2px dashed var(--ink);border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.photo .pv img{width:100%;height:100%;object-fit:cover}
+.go{display:block;margin:28px auto 0;position:relative;width:200px;height:74px;font-size:28px;font-weight:700}
+.go svg{position:absolute;inset:0;width:100%;height:100%}
+.go:disabled{opacity:.5}
+.err{text-align:center;min-height:1.2em;margin-top:8px;font-size:19px}
+.detail img{width:100%;border:2px solid var(--ink);border-radius:18px 22px 16px 20px;margin:6px 0 10px;max-height:50vh;object-fit:cover}
+.detail h3{font-size:34px;margin:4px 0 6px;font-weight:700}
+.detail p{margin:0 0 2px}
+.del{margin-top:22px;font-size:20px;text-decoration:underline;text-underline-offset:3px}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translate(-50%,-120px);background:var(--ink);color:var(--bg);padding:6px 16px;border-radius:16px 20px 15px 18px;z-index:60;transition:transform .3s;white-space:nowrap;font-size:20px}
+.toast.on{transform:translate(-50%,0)}
+.swim{position:fixed;left:-120px;top:40%;z-index:55;pointer-events:none;width:110px;animation:swim 1.8s ease-in-out forwards}
+@keyframes swim{0%{transform:translate(0,0) scaleX(-1)}30%{transform:translate(35vw,-30px) scaleX(-1)}60%{transform:translate(70vw,10px) scaleX(-1)}100%{transform:translate(calc(100vw + 140px),-20px) scaleX(-1)}}
+@media (prefers-reduced-motion:reduce){.swim{display:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="fish" viewBox="0 0 60 40"><path d="M4 21c7-11 20-15 31-12 5 1 9 4 12 8l8-8c1 7-1 13-1 13s2 7 1 13l-8-8c-4 4-8 6-13 7C22 36 11 32 4 21z"/><circle cx="14" cy="18" r="1.4" fill="#111"/><path d="M24 12c3 4 3 12 0 17"/></symbol>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <header>
+    <div class="logo">fish off.</div>
+    <button class="dot" id="dot" aria-label="refresh"></button>
+  </header>
+
+  <div class="doodle" aria-hidden="true">
+    <svg class="ink" viewBox="0 0 180 120">
+      <path d="M150 6c1 18-2 32-8 44"/>
+      <path d="M142 50c-4 9-12 12-18 8-5-4-4-11 1-13" />
+      <use href="#fish" x="30" y="52" width="96" height="64" transform="rotate(-8 78 84)"/>
+      <path d="M8 112c12-4 22 4 34 0s22-4 34 0 22 4 34 0 22-4 34 0 20 3 28 0" />
+    </svg>
+  </div>
+
+  <section class="score" id="score"></section>
+
+  <div class="logh"><div>the log.</div><button class="clear" id="clear" hidden>show all</button></div>
+  <div id="feed"><div class="empty">loading…</div></div>
+</main>
+
+<div class="hint" id="hint">
+  got one?<br>tap here
+  <svg class="ink" viewBox="0 0 60 50"><path d="M8 4c8 20 22 32 42 38"/><path d="M36 44l14-2-6-12"/></svg>
+</div>
+
+<nav class="bar">
+  <div class="bar-in">
+    <button class="tab" data-f="Harry" aria-pressed="false">
+      <svg class="ink" viewBox="0 0 60 40" style="transform:scaleX(-1)"><use href="#fish"/></svg>
+      <b id="hN">0</b><span class="nm">harry</span>
+    </button>
+    <button class="oval" id="logBtn" aria-label="log a catch">
+      <svg class="ink o" viewBox="0 0 66 112" preserveAspectRatio="none"><path d="M33 3C14 3 5 22 5 55s8 54 29 54 27-24 27-55S51 4 30 4"/></svg>
+      <svg class="ink plus" viewBox="0 0 34 40"><path d="M17 34V6M7 16l10-10 10 10"/><path d="M9 38c5 2 11 2 16 0"/></svg>
+    </button>
+    <button class="tab" data-f="Macy" aria-pressed="false">
+      <svg class="ink" viewBox="0 0 60 40"><use href="#fish"/></svg>
+      <b id="mN">0</b><span class="nm">macy</span>
+    </button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+
+<section class="sheet" id="logSheet" role="dialog" aria-modal="true" aria-label="log a catch">
+  <div class="sheet-in">
+    <div class="sheet-top"><div class="logo">new fish.</div><button class="x" data-close>close</button></div>
+
+    <div class="q">who caught it?</div>
+    <div class="words" id="whoW">
+      <button class="w" data-who="Harry" aria-pressed="false">harry</button>
+      <button class="w" data-who="Macy" aria-pressed="false">macy</button>
+    </div>
+
+    <div class="q">what was it?</div>
+    <div class="words" id="spW"></div>
+    <input class="u full" id="otherSp" placeholder="type it…" maxlength="60" style="display:none;margin-top:6px">
+
+    <div class="q">how big?</div>
+    <div class="line">
+      <input class="u n" id="len" type="number" inputmode="decimal" min="0" step="0.5" placeholder="__"> cm
+      <span style="width:14px"></span>
+      <input class="u n" id="wt" type="number" inputmode="decimal" min="0" step="0.05" placeholder="__"> kg
+    </div>
+
+    <div class="q">kept or released?</div>
+    <div class="words" id="relW">
+      <button class="w" data-rel="0" aria-pressed="true">kept</button>
+      <button class="w" data-rel="1" aria-pressed="false">released</button>
+    </div>
+
+    <div class="q">where?</div>
+    <input class="u full" id="spot" maxlength="80" placeholder="mount wharf, motiti…" list="spots">
+    <datalist id="spots"></datalist>
+
+    <div class="q">anything else?</div>
+    <input class="u full" id="note" maxlength="280" placeholder="bait, weather, excuses…">
+
+    <div class="q">when?</div>
+    <input class="u full" id="when" type="datetime-local">
+
+    <div class="q">photo</div>
+    <label class="photo"><input type="file" id="photo" accept="image/*"><span class="pv" id="pv">+</span><span id="ptxt">add one (optional)</span></label>
+
+    <button class="go" id="saveBtn">
+      <svg class="ink" viewBox="0 0 200 74" preserveAspectRatio="none"><path d="M100 5C45 4 6 18 6 38s40 32 96 31 92-14 92-33S150 4 96 6"/></svg>
+      <span id="saveTxt">log it.</span>
+    </button>
+    <div class="err" id="err" role="alert"></div>
+  </div>
+</section>
+
+<section class="sheet" id="detailSheet" role="dialog" aria-modal="true" aria-label="catch">
+  <div class="sheet-in detail">
+    <div class="sheet-top"><div class="logo" id="dWho"></div><button class="x" data-close>close</button></div>
+    <div id="dBody"></div>
+    <button class="del" id="delBtn">delete this one</button>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const SB_URL = "https://wkcwkkgzqqyltezvwecj.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrY3dra2d6cXF5bHRlenZ3ZWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MjMyMjcsImV4cCI6MjEwNjI5OTIyN30.-mQ3h22Ahce7yBb4mT7nexBPZSBVjEvK_DgztaKXlP4";
+  const H = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY };
+  const START = new Date("2026-10-01T00:00:00+13:00");
+  const END = new Date("2027-03-01T00:00:00+13:00"); // last day is 28 feb
+  const SPECIES = ["snapper","kahawai","kingfish","trevally","gurnard","john dory","tarakihi","blue maomao","mackerel","skipjack","parore","other"];
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const n1 = (v, d = 1) => String(Math.round(v * 10 ** d) / 10 ** d);
+  const dm = d => d.getDate() + "." + (d.getMonth() + 1);
+  const lc = s => String(s).toLowerCase();
+  const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+  let catches = [], filter = null, who = store.get("fo-who") || "Harry", sp = null, rel = false, photoBlob = null, openId = null;
+
+  async function api(path, opts = {}) {
+    const r = await fetch(SB_URL + "/rest/v1/" + path, { ...opts, headers: { ...H, "Content-Type": "application/json", ...(opts.headers || {}) } });
+    if (!r.ok) throw new Error(await r.text());
+    return r.status === 204 ? null : r.json();
+  }
+  async function load() {
+    $("#dot").classList.add("spin");
+    try { catches = await api("catches?select=*&order=caught_at.desc&limit=1000"); render(); }
+    catch { $("#feed").innerHTML = `<div class="empty">can't reach the fish. check signal, tap the dot.</div>`; }
+    $("#dot").classList.remove("spin");
+  }
+  async function uploadPhoto(blob) {
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const r = await fetch(`${SB_URL}/storage/v1/object/catch-photos/${name}`, { method: "POST", headers: { ...H, "Content-Type": "image/jpeg" }, body: blob });
+    if (!r.ok) throw new Error("photo upload failed");
+    return `${SB_URL}/storage/v1/object/public/catch-photos/${name}`;
+  }
+  function shrink(file) {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => b ? res(b) : rej(new Error("couldn't read photo")), "image/jpeg", .82);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => rej(new Error("couldn't read that photo"));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  const inSeason = c => { const t = new Date(c.caught_at); return t >= START && t < END; };
+  function seasonLine() {
+    const now = new Date(), day = 864e5, total = Math.round((END - START) / day);
+    if (now < START) { const d = Math.ceil((START - now) / day); return d <= 1 ? "starts tomorrow. 1.10 – 28.2" : `starts in ${d} days. 1.10 – 28.2`; }
+    if (now < END) return `day ${Math.floor((now - START) / day) + 1} of ${total}.`;
+    return "season's done.";
+  }
+  function best(list, key) { return list.filter(c => +c[key] > 0).sort((a, b) => b[key] - a[key])[0]; }
+
+  function render() {
+    const s = catches.filter(inSeason);
+    const h = s.filter(c => c.angler === "Harry"), m = s.filter(c => c.angler === "Macy");
+    $("#hN").textContent = h.length; $("#mN").textContent = m.length;
+    const now = new Date();
+    let lead = !s.length ? "no fish yet. first one sets the pace." : h.length === m.length ? "all square." : (h.length > m.length ? "harry" : "macy") + (now >= END ? " wins." : "'s ahead.");
+    const big = best(s, "length_cm"), heavy = best(s, "weight_kg");
+    const kinds = new Set(s.map(c => lc(c.species))).size;
+    let p = "";
+    if (big) p += `<p>biggest — ${esc(lc(big.species))} ${n1(+big.length_cm)}cm, ${lc(big.angler)}.</p>`;
+    if (heavy) p += `<p>heaviest — ${esc(lc(heavy.species))} ${n1(+heavy.weight_kg, 2)}kg, ${lc(heavy.angler)}.</p>`;
+    if (s.length) p += `<p>${kinds} species. ${s.filter(c => c.released).length} let go.</p>`;
+    $("#score").innerHTML = `<div class="big">harry ${h.length}. macy ${m.length}.</div><div>${lead}</div><div class="prose">${p}</div><div class="sig">${seasonLine()}</div>`;
+
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-pressed", t.dataset.f === filter));
+    $("#clear").hidden = !filter;
+    const list = catches.filter(c => !filter || c.angler === filter);
+    $("#feed").innerHTML = list.length ? list.map(c => {
+      const d = new Date(c.caught_at);
+      const size = [c.length_cm ? n1(+c.length_cm) + "cm" : "", c.weight_kg ? n1(+c.weight_kg, 2) + "kg" : ""].filter(Boolean).join(" ");
+      const sub = [dm(d), c.spot, c.released ? "let go" : "", c.note].filter(Boolean).map(x => esc(lc(x))).join(" · ");
+      return `<button class="entry" data-id="${esc(c.id)}">
+        <span class="pic">${c.photo_url ? `<img src="${esc(c.photo_url)}" alt="" loading="lazy">` : `<svg class="ink"><use href="#fish"/></svg>`}</span>
+        <span class="e-main"><div class="e-top">${esc(lc(c.species))} ${size}</div><div class="e-sub">${sub}</div></span>
+        <span class="e-who">${lc(c.angler)}</span></button>`;
+    }).join("") : `<div class="empty">${filter ? lc(filter) + " hasn't logged anything yet." : "nothing yet."}</div>`;
+    $("#spots").innerHTML = [...new Set(catches.map(c => c.spot).filter(Boolean))].slice(0, 20).map(x => `<option value="${esc(x)}">`).join("");
+    $("#hint").style.opacity = catches.length ? 0 : 1;
+  }
+
+  /* hint position: sits above-left of the oval */
+  function placeHint() {
+    const r = $("#logBtn").getBoundingClientRect(), hint = $("#hint");
+    hint.style.left = Math.max(12, r.left - 92) + "px";
+    hint.style.top = (r.top - 104) + "px";
+  }
+  addEventListener("resize", placeHint);
+
+  /* sheets */
+  const openSheet = el => { $("#scrim").classList.add("on"); el.classList.add("on"); };
+  const closeSheets = () => { $("#scrim").classList.remove("on"); document.querySelectorAll(".sheet").forEach(x => x.classList.remove("on")); openId = null; };
+  $("#scrim").onclick = closeSheets;
+  document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(); });
+
+  const press = (sel, test) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", test(b)));
+  const localNow = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+
+  $("#spW").innerHTML = SPECIES.map(x => `<button class="w" data-sp="${x}" aria-pressed="false">${x}</button>`).join("");
+
+  function openLog() {
+    sp = null; rel = false; photoBlob = null;
+    press("#whoW .w", b => b.dataset.who === who);
+    press("#spW .w", () => false);
+    press("#relW .w", b => b.dataset.rel === "0");
+    ["#len", "#wt", "#spot", "#note", "#otherSp"].forEach(s => $(s).value = "");
+    $("#otherSp").style.display = "none";
+    $("#photo").value = ""; $("#pv").textContent = "+"; $("#ptxt").textContent = "add one (optional)";
+    $("#when").value = localNow();
+    $("#err").textContent = ""; $("#saveBtn").disabled = false; $("#saveTxt").textContent = "log it.";
+    openSheet($("#logSheet"));
+  }
+  $("#logBtn").onclick = openLog;
+  $("#whoW").onclick = e => { const b = e.target.closest(".w"); if (!b) return; who = b.dataset.who; store.set("fo-who", who); press("#whoW .w", x => x === b); };
+  $("#relW").onclick = e => { const b = e.target.closest(".w"); if (!b) return; rel = b.dataset.rel === "1"; press("#relW .w", x => x === b); };
+  $("#spW").onclick = e => {
+    const b = e.target.closest(".w"); if (!b) return;
+    sp = b.dataset.sp; press("#spW .w", x => x === b);
+    $("#otherSp").style.display = sp === "other" ? "block" : "none";
+    if (sp === "other") $("#otherSp").focus();
+    $("#err").textContent = "";
+  };
+  $("#photo").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $("#ptxt").textContent = "one sec…";
+    try { photoBlob = await shrink(f); $("#pv").innerHTML = `<img src="${URL.createObjectURL(photoBlob)}" alt="">`; $("#ptxt").textContent = "nice. tap to change"; }
+    catch (err) { photoBlob = null; $("#ptxt").textContent = err.message; }
+  };
+
+  $("#saveBtn").onclick = async () => {
+    const species = sp === "other" ? $("#otherSp").value.trim() : sp;
+    if (!species) { $("#err").textContent = sp === "other" ? "what was it?" : "pick a fish first."; return; }
+    const num = v => { const x = parseFloat(v); return isFinite(x) && x > 0 ? x : null; };
+    const when = $("#when").value ? new Date($("#when").value) : new Date();
+    const row = { angler: who, species: lc(species), length_cm: num($("#len").value), weight_kg: num($("#wt").value),
+      spot: $("#spot").value.trim() || null, note: $("#note").value.trim() || null, released: rel,
+      caught_at: (isNaN(when) ? new Date() : when).toISOString() };
+    $("#saveBtn").disabled = true; $("#saveTxt").textContent = "reeling…"; $("#err").textContent = "";
+    try {
+      if (photoBlob) row.photo_url = await uploadPhoto(photoBlob);
+      const [saved] = await api("catches", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(row) });
+      catches.unshift(saved); catches.sort((a, b) => new Date(b.caught_at) - new Date(a.caught_at));
+      render(); closeSheets(); swim(); toast(`${lc(species)} for ${lc(who)}.`);
+    } catch {
+      $("#err").textContent = "didn't save. check signal, try again.";
+      $("#saveBtn").disabled = false; $("#saveTxt").textContent = "log it.";
+    }
+  };
+
+  $("#feed").onclick = e => {
+    const b = e.target.closest(".entry"); if (!b) return;
+    const c = catches.find(x => x.id === b.dataset.id); if (!c) return;
+    openId = c.id;
+    const d = new Date(c.caught_at);
+    const t = d.toLocaleTimeString("en-NZ", { hour: "numeric", minute: "2-digit" });
+    $("#dWho").textContent = lc(c.angler) + ".";
+    $("#dBody").innerHTML = `${c.photo_url ? `<img src="${esc(c.photo_url)}" alt="">` : ""}
+      <h3>${esc(lc(c.species))}</h3>
+      ${c.length_cm || c.weight_kg ? `<p>${[c.length_cm ? n1(+c.length_cm) + "cm" : "", c.weight_kg ? n1(+c.weight_kg, 2) + "kg" : ""].filter(Boolean).join(" · ")}</p>` : ""}
+      <p>${dm(d)} · ${esc(t)}${c.spot ? " · " + esc(lc(c.spot)) : ""}</p>
+      <p>${c.released ? "let go." : "kept."}</p>
+      ${c.note ? `<p>${esc(lc(c.note))}</p>` : ""}`;
+    $("#delBtn").textContent = "delete this one"; delete $("#delBtn").dataset.armed;
+    openSheet($("#detailSheet"));
+  };
+  $("#delBtn").onclick = async () => {
+    const btn = $("#delBtn");
+    if (!btn.dataset.armed) { btn.dataset.armed = "1"; btn.textContent = "tap again to delete for good"; return; }
+    const id = openId; btn.disabled = true; btn.textContent = "deleting…";
+    try { await api("catches?id=eq." + encodeURIComponent(id), { method: "DELETE" }); catches = catches.filter(c => c.id !== id); render(); closeSheets(); toast("gone."); }
+    catch { btn.textContent = "couldn't delete. try again"; delete btn.dataset.armed; }
+    btn.disabled = false;
+  };
+
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { filter = filter === t.dataset.f ? null : t.dataset.f; render(); });
+  $("#clear").onclick = () => { filter = null; render(); };
+  $("#dot").onclick = () => load();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+
+  let tt;
+  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 2200); }
+  function swim() {
+    const f = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    f.setAttribute("viewBox", "0 0 60 40"); f.setAttribute("class", "ink swim");
+    f.innerHTML = '<use href="#fish"/>';
+    document.body.appendChild(f); setTimeout(() => f.remove(), 2000);
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+
+  placeHint();
+  load();
+})();
+</script>
+</body>
+</html>
