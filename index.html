@@ -149,9 +149,9 @@ input[type=number]::-webkit-inner-spin-button{appearance:none}
       <svg class="ink o" viewBox="0 0 66 112" preserveAspectRatio="none"><path d="M33 3C14 3 5 22 5 55s8 54 29 54 27-24 27-55S51 4 30 4"/></svg>
       <svg class="ink plus" viewBox="0 0 34 40"><path d="M17 34V6M7 16l10-10 10 10"/><path d="M9 38c5 2 11 2 16 0"/></svg>
     </button>
-    <button class="tab" data-f="Macy" aria-pressed="false">
+    <button class="tab" data-f="Macey" aria-pressed="false">
       <svg class="ink" viewBox="0 0 60 40"><use href="#fish"/></svg>
-      <b id="mN">0</b><span class="nm">macy</span>
+      <b id="mN">0</b><span class="nm">macey</span>
     </button>
   </div>
 </nav>
@@ -165,7 +165,7 @@ input[type=number]::-webkit-inner-spin-button{appearance:none}
     <div class="q">who caught it?</div>
     <div class="words" id="whoW">
       <button class="w" data-who="Harry" aria-pressed="false">harry</button>
-      <button class="w" data-who="Macy" aria-pressed="false">macy</button>
+      <button class="w" data-who="Macey" aria-pressed="false">macey</button>
     </div>
 
     <div class="q">what was it?</div>
@@ -277,17 +277,17 @@ input[type=number]::-webkit-inner-spin-button{appearance:none}
 
   function render() {
     const s = catches.filter(inSeason);
-    const h = s.filter(c => c.angler === "Harry"), m = s.filter(c => c.angler === "Macy");
+    const h = s.filter(c => c.angler === "Harry"), m = s.filter(c => c.angler === "Macey");
     $("#hN").textContent = h.length; $("#mN").textContent = m.length;
     const now = new Date();
-    let lead = !s.length ? "no fish yet. first one sets the pace." : h.length === m.length ? "all square." : (h.length > m.length ? "harry" : "macy") + (now >= END ? " wins." : "'s ahead.");
+    let lead = !s.length ? "no fish yet. first one sets the pace." : h.length === m.length ? "all square." : (h.length > m.length ? "harry" : "macey") + (now >= END ? " wins." : "'s ahead.");
     const big = best(s, "length_cm"), heavy = best(s, "weight_kg");
     const kinds = new Set(s.map(c => lc(c.species))).size;
     let p = "";
     if (big) p += `<p>biggest — ${esc(lc(big.species))} ${n1(+big.length_cm)}cm, ${lc(big.angler)}.</p>`;
     if (heavy) p += `<p>heaviest — ${esc(lc(heavy.species))} ${n1(+heavy.weight_kg, 2)}kg, ${lc(heavy.angler)}.</p>`;
     if (s.length) p += `<p>${kinds} species. ${s.filter(c => c.released).length} let go.</p>`;
-    $("#score").innerHTML = `<div class="big">harry ${h.length}. macy ${m.length}.</div><div>${lead}</div><div class="prose">${p}</div><div class="sig">${seasonLine()}</div>`;
+    $("#score").innerHTML = `<div class="big">harry ${h.length}. macey ${m.length}.</div><div>${lead}</div><div class="prose">${p}</div><div class="sig">${seasonLine()}</div>`;
 
     document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-pressed", t.dataset.f === filter));
     $("#clear").hidden = !filter;
